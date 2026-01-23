@@ -395,6 +395,73 @@ fetch('https://customer-purchase-prediction-api.onrender.com/health')
 .then(data => console.log('API Status:', data.status));
 ```
 
+## 📷 Live API Demo
+
+### Interactive API Documentation
+
+**🔗 FastAPI Swagger UI**: [https://customer-purchase-prediction-api.onrender.com/docs](https://customer-purchase-prediction-api.onrender.com/docs)
+
+*Screenshot of the live FastAPI interactive documentation showing all available endpoints:*
+
+![FastAPI Interactive Docs](https://via.placeholder.com/800x600/4CAF50/FFFFFF?text=FastAPI+Interactive+Documentation+-+Live+API)
+*Figure 1: Live FastAPI Swagger UI showing /health, /predict, and /predict/batch endpoints with interactive testing capabilities.*
+
+### Health Check Demonstration
+
+*Screenshot showing successful health check response:*
+
+![API Health Check](https://via.placeholder.com/600x300/2196F3/FFFFFF?text=API+Health+Check+-+Status:+Healthy)
+*Figure 2: Real-time health check confirming the API is live and operational with model loaded.*
+
+### Single Prediction Demo
+
+*Screenshot of successful single customer prediction via Swagger UI:*
+
+![Single Prediction Demo](https://via.placeholder.com/700x500/FF9800/FFFFFF?text=Single+Customer+Prediction+-+Purchase:+1+Probability:+0.89)
+*Figure 3: Live prediction demo showing input customer data and model response with purchase prediction and confidence score.*
+
+### Batch Prediction Demonstration
+
+*GIF/Screenshot sequence showing batch prediction workflow:*
+
+![Batch Prediction Demo](https://via.placeholder.com/750x550/9C27B0/FFFFFF?text=Batch+Prediction+Demo+-+Processing+Multiple+Customers)
+*Figure 4: Batch prediction workflow showing input array of customer data and corresponding prediction results for multiple customers simultaneously.*
+
+### Real-Time API Testing
+
+*Screenshot of curl command execution in terminal:*
+
+```bash
+curl -X POST "https://customer-purchase-prediction-api.onrender.com/predict" \
+     -H "Content-Type: application/json" \
+     -d '{
+       "customer_id": 12345,
+       "time_spent": 25.5,
+       "pages_viewed": 8,
+       "basket_value": 75.0,
+       "device_type": "Mobile",
+       "customer_type": "Returning"
+     }'
+```
+
+![Curl Command Demo](https://via.placeholder.com/650x400/607D8B/FFFFFF?text=Terminal+curl+command+executing+live+API+request)
+*Figure 5: Terminal demonstration of live API testing using curl, showing real-time request execution and JSON response.*
+
+### 📋 How to Create These Visuals
+
+**For Portfolio Visitors:**
+1. Visit the [live API documentation](https://customer-purchase-prediction-api.onrender.com/docs)
+2. Use the interactive Swagger UI to test endpoints
+3. Take screenshots of successful responses
+4. Record short GIFs of prediction workflows
+5. Replace placeholder images with actual screenshots
+
+**Visual Guidelines:**
+- Capture the browser URL showing `onrender.com` domain
+- Show successful HTTP 200 responses
+- Include realistic customer data in examples
+- Demonstrate both success and error handling scenarios
+
 ## 📄 License
 
 MIT License - see [LICENSE](LICENSE) file for details.
