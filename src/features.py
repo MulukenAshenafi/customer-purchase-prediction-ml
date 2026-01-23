@@ -156,7 +156,7 @@ class FeatureEngineer:
 
     def encode_categorical_features(self, df: pd.DataFrame) -> pd.DataFrame:
         """
-        One-hot encode categorical features.
+        One-hot encode categorical features with all possible categories.
 
         Args:
             df: DataFrame with categorical features
@@ -164,12 +164,33 @@ class FeatureEngineer:
         Returns:
             DataFrame with one-hot encoded categorical features
         """
-        # One-hot encode categorical columns
-        encoded_df = pd.get_dummies(df[self.categorical_cols], prefix=self.categorical_cols)
+        # Define all possible categories (matching training data)
+        device_categories = ['Desktop', 'Mobile', 'Tablet', 'Unknown']
+        customer_categories = ['New', 'Returning']
 
-        # Drop original categorical columns and add encoded ones
+        # One-hot encode with all possible categories
+        device_encoded = pd.get_dummies(df['device_type'], prefix='device_type')
+        customer_encoded = pd.get_dummies(df['customer_type'], prefix='customer_type')
+
+        # Ensure all categories exist (add missing ones as False)
+        for cat in device_categories:
+            col_name = f'device_type_{cat}'
+            if col_name not in device_encoded.columns:
+                device_encoded[col_name] = False
+
+        for cat in customer_categories:
+            col_name = f'customer_type_{cat}'
+            if col_name not in customer_encoded.columns:
+                customer_encoded[col_name] = False
+
+        # Reorder columns to match expected order
+        device_encoded = device_encoded[['device_type_Desktop', 'device_type_Mobile',
+                                       'device_type_Tablet', 'device_type_Unknown']]
+        customer_encoded = customer_encoded[['customer_type_New', 'customer_type_Returning']]
+
+        # Drop original categorical columns and add encoded columns
         df_encoded = df.drop(columns=self.categorical_cols)
-        df_encoded = pd.concat([df_encoded, encoded_df], axis=1)
+        df_encoded = pd.concat([df_encoded, device_encoded, customer_encoded], axis=1)
 
         return df_encoded
 

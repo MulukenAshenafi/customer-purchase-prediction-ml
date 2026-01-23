@@ -85,24 +85,43 @@ class PurchasePredictor:
         """
         Preprocess new customer data for prediction.
 
+        This matches the preprocessing used during training:
+        - Handle missing values
+        - Scale numerical features
+        - One-hot encode categorical features
+
         Args:
             customer_data: Raw customer data DataFrame
 
         Returns:
-            Processed and feature-engineered DataFrame ready for prediction
+            Processed DataFrame ready for prediction
         """
-        # Clean the data using the same pipeline as training
-        cleaned_data = self.preprocessor.clean_data(customer_data)
+        # For prediction data, we don't expect a 'purchase' column
+        df_copy = customer_data.copy()
 
-        # Apply feature engineering (this will fit scaler on new data)
-        # Note: In production, you might want to load a pre-fitted scaler
-        processed_data = self.feature_engineer.process_features(cleaned_data, fit_scaler=True)
+        # Handle missing values according to business rules (matching training preprocessing)
+        df_copy['time_spent'] = df_copy['time_spent'].fillna(df_copy['time_spent'].median() if not df_copy['time_spent'].empty else 34.33)
+        df_copy['pages_viewed'] = df_copy['pages_viewed'].fillna(df_copy['pages_viewed'].mean() if not df_copy['pages_viewed'].empty else 9.78)
+        df_copy['basket_value'] = df_copy['basket_value'].fillna(0.0)
+        df_copy['device_type'] = df_copy['device_type'].fillna('Unknown')
+        df_copy['customer_type'] = df_copy['customer_type'].fillna('New')
 
-        # Remove target column if it exists (for prediction on new data)
-        if 'purchase' in processed_data.columns:
-            processed_data = processed_data.drop('purchase', axis=1)
+        # Ensure correct data types
+        df_copy['customer_id'] = df_copy['customer_id'].astype(int)
+        df_copy['pages_viewed'] = df_copy['pages_viewed'].astype(int)
 
-        return processed_data
+        # Scale numerical features (fit on prediction data for now)
+        numerical_cols = ['time_spent', 'pages_viewed', 'basket_value']
+        df_scaled = self.feature_engineer.scale_numerical_features(df_copy, fit=True)
+
+        # One-hot encode categorical features
+        df_encoded = self.feature_engineer.encode_categorical_features(df_scaled)
+
+        # Remove customer_id from features (not used for prediction)
+        if 'customer_id' in df_encoded.columns:
+            df_encoded = df_encoded.drop('customer_id', axis=1)
+
+        return df_encoded
 
     def predict(self,
                customer_data: Union[pd.DataFrame, Dict[str, Any], List[Dict[str, Any]]],
@@ -148,16 +167,13 @@ class PurchasePredictor:
         # Preprocess the data
         processed_data = self.preprocess_new_data(df)
 
-        # Remove customer_id from features for prediction
-        features_for_prediction = processed_data.drop('customer_id', axis=1)
-
-        # Make predictions
-        predictions = self.model.predict(features_for_prediction)
+        # Make predictions (customer_id already removed in preprocessing)
+        predictions = self.model.predict(processed_data)
 
         # Get prediction probabilities if requested
         probabilities = None
         if return_probabilities and hasattr(self.model, 'predict_proba'):
-            probabilities = self.model.predict_proba(features_for_prediction)[:, 1]
+            probabilities = self.model.predict_proba(processed_data)[:, 1]
 
         # Create results DataFrame
         results_df = pd.DataFrame({

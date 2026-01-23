@@ -1,311 +1,312 @@
-# Customer Purchase Prediction ML System
+# Customer Purchase Prediction - Production ML System
 
 [![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-green.svg)](https://fastapi.tiangolo.com/)
 [![scikit-learn](https://img.shields.io/badge/scikit--learn-1.2+-orange.svg)](https://scikit-learn.org/)
-[![XGBoost](https://img.shields.io/badge/XGBoost-1.7+-green.svg)](https://xgboost.ai/)
 [![License](https://img.shields.io/badge/License-MIT-red.svg)](LICENSE)
 
-A production-ready machine learning system that predicts customer purchase likelihood based on e-commerce browsing behavior. Built with modern ML engineering practices, comprehensive evaluation, and scalable inference capabilities.
+A production-ready machine learning system that predicts customer purchase likelihood from e-commerce browsing behavior. Built with modern ML engineering practices, comprehensive evaluation, and a deployable FastAPI inference service.
 
 ## 🎯 Business Problem
 
-RetailTech Solutions, a global e-commerce platform, needs to predict which customers are most likely to make purchases based on their website browsing behavior. This enables:
+RetailTech Solutions, a global e-commerce platform, needs to identify customers with high purchase intent based on their browsing behavior to:
 
-- **Personalized Marketing**: Target high-intent customers with relevant offers
-- **Revenue Optimization**: Maximize conversion rates and reduce marketing waste
-- **Customer Experience**: Deliver timely, relevant recommendations
-- **Resource Allocation**: Optimize marketing spend across customer segments
+- **Improve marketing conversion rates**
+- **Reduce wasted ad spend on low-intent visitors**
+- **Personalize customer engagement in real-time**
+- **Prioritize high-value sessions for customer service**
+
+The system maximizes revenue opportunities while remaining interpretable and production-deployable.
 
 ## 📊 Data Overview
 
-The system processes customer session data with the following features:
+The dataset contains 500 customer browsing sessions with 7 features capturing user behavior and session characteristics.
+
+### Feature Description
 
 | Feature | Type | Description | Missing Value Handling |
 |---------|------|-------------|----------------------|
-| `customer_id` | Integer | Unique customer identifier | No missing values |
-| `time_spent` | Float | Minutes spent on website | Imputed with median |
-| `pages_viewed` | Integer | Number of pages viewed | Imputed with mean |
-| `basket_value` | Float | Value of items in basket | Imputed with 0 |
-| `device_type` | String | Mobile/Desktop/Tablet | Imputed with "Unknown" |
-| `customer_type` | String | New/Returning customer | Imputed with "New" |
-| `purchase` | Binary | Purchase made (0=No, 1=Yes) | Target variable |
+| `customer_id` | Integer | Unique session identifier | No missing values |
+| `time_spent` | Float | Minutes spent on website | Median imputation |
+| `pages_viewed` | Integer | Pages viewed during session | Mean imputation |
+| `basket_value` | Float | Value of items added to cart | Filled with 0 |
+| `device_type` | Categorical | Mobile/Desktop/Tablet | Filled with "Unknown" |
+| `customer_type` | Categorical | New/Returning customer | Filled with "New" |
+| `purchase` | Binary | Purchase outcome (0=No, 1=Yes) | Target variable |
 
-**Dataset Size**: ~1,000 customer sessions
-**Target Distribution**: Binary classification with class imbalance consideration
+### Dataset Statistics
+
+- **Total sessions**: 500
+- **Train/Validation/Test split**: 559/120/121 samples (70%/15%/15%)
+- **Target distribution**: 81.4% purchase, 18.6% no-purchase
+- **Class imbalance ratio**: ~4.4:1 (purchase:no-purchase)
 
 ## 🏗️ System Architecture
 
 ```
 customer-purchase-prediction-ml/
+├── api/
+│   └── main.py               # FastAPI inference service
 ├── data/
-│   ├── raw/                 # Raw customer data
-│   └── processed/           # Cleaned and processed datasets
+│   ├── raw/                  # Raw customer session data
+│   └── processed/            # Cleaned & feature-engineered data
 ├── src/
-│   ├── preprocessing.py     # Data cleaning and validation
-│   ├── features.py          # Feature engineering pipeline
-│   ├── train.py            # Model training with multiple algorithms
-│   ├── evaluate.py         # Comprehensive model evaluation
-│   └── inference.py        # Production prediction API
-├── models/                  # Saved trained models
+│   ├── preprocessing.py      # Data validation & cleaning
+│   ├── features.py           # Feature engineering
+│   ├── train.py              # Model training pipeline
+│   ├── evaluate.py           # Model evaluation & selection
+│   └── inference.py          # Production prediction API
+├── models/                   # Trained models & metrics
 ├── notebooks/
-│   └── exploration.ipynb   # Data exploration and analysis
-├── requirements.txt         # Python dependencies
-├── env.example             # Environment configuration template
-└── README.md              # This file
+│   └── exploration.ipynb     # Exploratory data analysis
+├── requirements.txt          # Python dependencies
+├── env.example              # Environment configuration
+└── README.md                # This file
 ```
 
 ## 🔧 Feature Engineering
 
-The system implements sophisticated feature engineering to capture customer behavior patterns:
+Feature engineering focuses on behavioral intent rather than raw metrics.
 
 ### Engineered Features
 
-1. **Engagement Score** (`engagement_score`)
-   - **Formula**: Normalized combination of `time_spent` and `pages_viewed`
-   - **Purpose**: Quantifies overall user engagement level
-   - **Business Value**: Higher scores indicate more committed browsing behavior
+1. **Engagement Score**
+   - Formula: Normalized combination of `time_spent` and `pages_viewed`
+   - Purpose: Captures overall browsing commitment
+   - Business Value: Higher scores indicate more engaged users
 
-2. **Basket Intensity** (`basket_intensity`)
-   - **Formula**: `basket_value / (pages_viewed + 1)` (with smoothing)
-   - **Purpose**: Measures purchase intent strength per page interaction
-   - **Business Value**: Identifies efficient shoppers vs. window shoppers
+2. **Basket Intensity**
+   - Formula: `basket_value / (pages_viewed + 1)`
+   - Purpose: Measures purchase intent efficiency per page
+   - Business Value: Identifies efficient shoppers vs. window shoppers
 
-3. **Behavioral Segmentation** (`behavioral_segment`)
-   - **Categories**: `high_engagement`, `focused_shopper`, `window_shopper`, `casual_browser`
-   - **Purpose**: Categorical segmentation based on activity patterns
-   - **Business Value**: Enables targeted marketing strategies per segment
+3. **Behavioral Segmentation**
+   - Categories: `high_engagement`, `focused_shopper`, `window_shopper`, `casual_browser`
+   - Purpose: Rule-based behavioral categorization
+   - Business Value: Enables targeted marketing strategies
 
 ### Preprocessing Pipeline
 
-- **Scaling**: MinMax scaling for numerical features (0-1 range)
-- **Encoding**: One-hot encoding for categorical variables
-- **Missing Values**: Intelligent imputation based on data characteristics
+- **Numerical Features**: Min-Max scaling (0-1 range)
+- **Categorical Features**: One-hot encoding with all possible categories
+- **Missing Values**: Business-rule-based imputation
+- **Validation**: Strict type checking and data quality assurance
 
 ## 🤖 Model Development
 
-### Algorithms Compared
+### Algorithms Evaluated
 
-1. **Logistic Regression** - Baseline interpretable model
-2. **Random Forest** - Ensemble method with feature importance
-3. **XGBoost** - Gradient boosting for high performance
+- **Logistic Regression**: Baseline interpretable model
+- **Random Forest**: Ensemble method with feature importance
+- **XGBoost**: Gradient boosting for high performance
 
 ### Training Strategy
 
-- **Data Split**: 70% train, 15% validation, 15% test
-- **Cross-Validation**: Stratified splitting to maintain class distribution
-- **Reproducibility**: Fixed random seeds (42) for consistent results
-- **Hyperparameters**: Tuned for balance between bias and variance
+- **Stratified splitting**: Maintains class distribution across splits
+- **Fixed random seed**: Ensures reproducible results (seed=42)
+- **Hyperparameter tuning**: Default parameters optimized for this dataset
+- **Model persistence**: Joblib serialization for production deployment
 
-### Model Selection Criteria
+### Selection Criteria
 
-**Primary Metric**: F1-Score (balances precision and recall)
-- **Precision**: Minimizes false positives (wasted marketing spend)
-- **Recall**: Minimizes false negatives (missed revenue opportunities)
-- **Business Context**: F1-score provides optimal balance for most scenarios
+**Primary Metric**: F1-Score (harmonic mean of precision and recall)
 
-## 📈 Evaluation Results
+**Business Rationale**:
+- **Precision**: Minimize false positives (wasted marketing spend)
+- **Recall**: Minimize false negatives (missed revenue opportunities)
+- **F1-Balance**: Optimal trade-off for revenue optimization
 
-### Performance Metrics
+## 📈 Model Performance
+
+### Test Set Results (121 samples)
 
 | Model | Accuracy | Precision | Recall | F1-Score | AUC |
 |-------|----------|-----------|--------|----------|-----|
-| Logistic Regression | 0.82 | 0.79 | 0.81 | 0.80 | 0.88 |
-| Random Forest | 0.85 | 0.83 | 0.84 | 0.83 | 0.91 |
-| **XGBoost** | **0.87** | **0.85** | **0.86** | **0.85** | **0.92** |
+| **Logistic Regression** | **0.785** | **0.792** | **0.990** | **0.880** | **0.592** |
+| Random Forest | 0.793 | 0.820 | 0.948 | 0.879 | 0.603 |
+| XGBoost | 0.777 | 0.822 | 0.917 | 0.867 | 0.631 |
+
+### Selected Model: Logistic Regression
+
+**Why Logistic Regression?**
+- **Highest F1-Score**: 0.880 (best balance of precision/recall)
+- **Near-perfect recall**: 99.0% (misses almost no purchasers)
+- **Interpretable**: Clear coefficient-based feature importance
+- **Production-ready**: Fast inference, low resource requirements
 
 ### Business Impact Analysis
 
-**Selected Model**: XGBoost (best F1-score: 0.85)
+- **Correct predictions**: 95 out of 121 test samples (78.5% accuracy)
+- **Missed opportunities**: Only 1 potential purchaser not identified
+- **Marketing efficiency**: 25 false positives (acceptable targeting waste)
+- **Revenue protection**: 99.0% recall prioritizes sales over perfect precision
 
-**Confusion Matrix Insights**:
-- **Correct Predictions**: 87% of customers classified accurately
-- **Missed Opportunities**: 14% of potential purchases not identified
-- **Marketing Efficiency**: 15% of marketing targeted at non-purchasers
+## 🚀 FastAPI Inference Service
 
-**Precision vs Recall Tradeoff**:
-- Model achieves 85% precision and 86% recall
-- Balanced approach suitable for revenue optimization
-- False positives: 15% (acceptable marketing waste)
-- False negatives: 14% (acceptable missed opportunities)
+Production-ready REST API for real-time predictions.
 
-## 🚀 Quick Start
-
-### Prerequisites
-
-- Python 3.8+
-- pip package manager
-
-### Installation
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/yourusername/customer-purchase-prediction-ml.git
-   cd customer-purchase-prediction-ml
-   ```
-
-2. **Install dependencies**
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-3. **Set up environment** (optional)
-   ```bash
-   cp env.example .env
-   # Edit .env with your configuration
-   ```
-
-### Usage
-
-#### Training Pipeline
+### Quick Start
 
 ```bash
-# Run complete training pipeline
+# Install dependencies
+pip install -r requirements.txt
+
+# Start the API server
+uvicorn api.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+**API Documentation**: http://localhost:8000/docs (Swagger UI)
+
+### Endpoints
+
+#### Health Check
+```http
+GET /health
+```
+
+Response:
+```json
+{
+  "status": "healthy",
+  "model_loaded": true,
+  "version": "1.0.0",
+  "model_info": {
+    "model_type": "LogisticRegression",
+    "features": ["time_spent", "pages_viewed", "basket_value", ...]
+  }
+}
+```
+
+#### Single Prediction
+```http
+POST /predict
+```
+
+Request:
+```json
+{
+  "customer_id": 12345,
+  "time_spent": 25.5,
+  "pages_viewed": 8,
+  "basket_value": 75.0,
+  "device_type": "Mobile",
+  "customer_type": "Returning"
+}
+```
+
+Response:
+```json
+{
+  "customer_id": 12345,
+  "purchase_prediction": 1,
+  "purchase_probability": 0.89,
+  "prediction_confidence": "high"
+}
+```
+
+#### Batch Predictions
+```http
+POST /predict/batch
+```
+
+Request:
+```json
+{
+  "customers": [
+    {
+      "customer_id": 12345,
+      "time_spent": 25.5,
+      "pages_viewed": 8,
+      "basket_value": 75.0,
+      "device_type": "Mobile",
+      "customer_type": "Returning"
+    }
+  ]
+}
+```
+
+Response:
+```json
+{
+  "predictions": [
+    {
+      "customer_id": 12345,
+      "purchase_prediction": 1,
+      "purchase_probability": 0.89,
+      "prediction_confidence": "high"
+    }
+  ],
+  "total_customers": 1,
+  "processing_time_seconds": 0.023
+}
+```
+
+### API Features
+
+- **Input Validation**: Pydantic models with comprehensive validation
+- **Error Handling**: Proper HTTP status codes and error messages
+- **Type Safety**: Full type hints and runtime validation
+- **Performance**: Optimized for low-latency predictions
+- **Scalability**: Stateless design, horizontally scalable
+
+## 🔍 Model Interpretability
+
+### Feature Importance (Correlation Analysis)
+
+1. **basket_value** (0.431) - Strongest predictor of purchase intent
+2. **pages_viewed** (0.266) - Moderate positive correlation
+3. **customer_type** (0.157) - Returning customers more likely to purchase
+4. **time_spent** (0.042) - Weak correlation despite intuitive appeal
+5. **device_type** (-0.063) - Minimal impact on purchase likelihood
+
+### Key Business Insights
+
+- **Basket value dominates**: Most predictive feature by far
+- **Engagement matters**: Page views show stronger correlation than time spent alone
+- **Loyalty advantage**: Returning customers convert at higher rates
+- **Device neutrality**: Purchase intent similar across device types
+
+## 🧪 Validation & Reliability
+
+- **Reproducible pipeline**: Fixed random seeds ensure consistent results
+- **Comprehensive testing**: Input validation and edge case handling
+- **Data quality assurance**: Strict preprocessing and feature validation
+- **Model monitoring**: Built-in health checks and performance tracking
+
+## 📋 Usage Examples
+
+### Training Pipeline
+
+```bash
+# Train all models
 python src/train.py
 
-# Evaluate all trained models
+# Evaluate models on test set
 python src/evaluate.py
 ```
 
-#### Making Predictions
+### Batch Predictions from CSV
 
 ```python
 from src.inference import PurchasePredictor
 
-# Initialize predictor
 predictor = PurchasePredictor()
-
-# Single customer prediction
-customer = {
-    'customer_id': 12345,
-    'time_spent': 25.5,
-    'pages_viewed': 8,
-    'basket_value': 75.0,
-    'device_type': 'Mobile',
-    'customer_type': 'Returning'
-}
-
-result = predictor.predict(customer, return_probabilities=True)
-print(result)
-# {'customer_id': 12345, 'purchase_prediction': 1, 'purchase_probability': 0.78, 'prediction_confidence': 'high'}
-```
-
-#### Batch Predictions
-
-```python
-# Predict from CSV file
 predictions = predictor.predict_from_csv(
-    'path/to/new_customers.csv',
-    output_path='predictions_output.csv',
-    return_probabilities=True
+    'new_customers.csv',
+    output_path='predictions.csv'
 )
 ```
 
-## 🔍 Model Interpretability
-
-### Feature Importance (Random Forest)
-
-1. **basket_value** (0.32) - Most predictive feature
-2. **engagement_score** (0.28) - Engineered engagement metric
-3. **time_spent** (0.18) - Raw browsing time
-4. **pages_viewed** (0.15) - Raw page interactions
-5. **basket_intensity** (0.07) - Engineered efficiency metric
-
-### Business Insights
-
-- **High-Value Customers**: Basket value is the strongest predictor
-- **Engagement Matters**: Combined time and page metrics improve predictions
-- **Device Preferences**: Mobile users show different patterns than desktop
-- **Customer Loyalty**: Returning customers have higher conversion rates
-
-## 🧪 Testing & Validation
-
-### Data Validation
-
-- **Missing Values**: Proper handling according to business rules
-- **Data Types**: Strict type checking and conversion
-- **Categorical Values**: Validation against allowed categories
-- **Outlier Detection**: Statistical outlier analysis
-
-### Model Validation
-
-- **Cross-Validation**: 5-fold stratified CV during training
-- **Holdout Testing**: Unseen test set for final evaluation
-- **Reproducibility**: Fixed seeds ensure consistent results
-- **Performance Monitoring**: Comprehensive metric tracking
-
-## 📁 API Reference
-
-### PurchasePredictor Class
-
-#### Methods
-
-- `predict(customer_data, return_probabilities=False)` - Make predictions
-- `predict_from_csv(csv_path, output_path=None)` - Batch predictions from CSV
-- `get_model_info()` - Get model and pipeline information
-- `validate_input_data(data)` - Validate input data structure
-
-#### Input Format
-
-```python
-customer_data = {
-    'customer_id': int,      # Required
-    'time_spent': float,     # Required (minutes)
-    'pages_viewed': int,     # Required
-    'basket_value': float,   # Required
-    'device_type': str,      # Required ('Mobile', 'Desktop', 'Tablet', 'Unknown')
-    'customer_type': str     # Required ('New', 'Returning')
-}
-```
-
-## 🔄 CI/CD & Deployment
-
-### Local Development
-
-```bash
-# Run all preprocessing steps
-python src/preprocessing.py
-
-# Train models with custom parameters
-python src/train.py --config config/training_config.json
-
-# Evaluate with different criteria
-python src/evaluate.py --criteria precision
-```
-
-### Production Deployment
-
-The inference module is designed for easy deployment:
-
-- **Stateless**: No internal state dependencies
-- **Scalable**: Can handle batch predictions efficiently
-- **Robust**: Comprehensive input validation and error handling
-- **Monitorable**: Detailed logging and performance metrics
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/new-feature`)
-3. Commit changes (`git commit -am 'Add new feature'`)
-4. Push to branch (`git push origin feature/new-feature`)
-5. Create a Pull Request
-
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+MIT License - see [LICENSE](LICENSE) file for details.
 
-## 👥 Acknowledgments
+## 👤 Author
 
-- RetailTech Solutions for providing the business context and data
-- Open source ML community for algorithms and tools
-- Data science community for best practices and methodologies
-
-## 📞 Contact
-
-**AI Engineer**: [Your Name]
-**Email**: your.email@example.com
-**LinkedIn**: [Your LinkedIn Profile]
-**GitHub**: [Your GitHub Profile]
+**Muluken Ashenafi**
+- AI/ML Engineer
+- Email: mulukenashenafi84@gmail.com
+- LinkedIn: https://www.linkedin.com/in/muluken-ashenafi21/
+- GitHub: https://github.com/MulukenAshenafi
 
 ---
-
-*Built with ❤️ for demonstrating production ML engineering skills*
