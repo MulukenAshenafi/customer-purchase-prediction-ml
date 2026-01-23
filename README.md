@@ -403,7 +403,9 @@ fetch('https://customer-purchase-prediction-api.onrender.com/health')
 
 *Screenshot of the live FastAPI interactive documentation showing all available endpoints:*
 
-![FastAPI Interactive Docs](https://via.placeholder.com/800x600/4CAF50/FFFFFF?text=FastAPI+Interactive+Documentation+-+Live+API)
+![FastAPI Interactive Docs](<img width="1879" height="933" alt="image" src="https://github.com/user-attachments/assets/f008010e-9d07-4600-8759-b430f5f44496" />
+)
+
 *Figure 1: Live FastAPI Swagger UI showing /health, /predict, and /predict/batch endpoints with interactive testing capabilities.*
 
 ### Health Check Demonstration
