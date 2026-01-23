@@ -1,5 +1,6 @@
 # Customer Purchase Prediction - Production ML System
 
+[![Render](https://img.shields.io/badge/Render-Deployed-brightgreen)](https://customer-purchase-prediction-api.onrender.com)
 [![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-green.svg)](https://fastapi.tiangolo.com/)
 [![scikit-learn](https://img.shields.io/badge/scikit--learn-1.2+-orange.svg)](https://scikit-learn.org/)
@@ -63,6 +64,46 @@ customer-purchase-prediction-ml/
 ├── env.example              # Environment configuration
 └── README.md                # This file
 ```
+
+## 🏛️ Architecture Diagram
+
+```
+┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐    ┌──────────────┐
+│   Raw Data      │    │   ML Pipeline     │    │   Trained       │    │   FastAPI    │
+│   (CSV files)   │───▶│   Processing      │───▶│   Models        │───▶│   Service    │
+│                 │    │                   │    │                 │    │              │
+│ • customer_id   │    │ • preprocessing.py│    │ • best_model    │    │ • /health    │
+│ • time_spent    │    │ • features.py     │    │ • evaluation    │    │ • /predict   │
+│ • pages_viewed  │    │ • train.py        │    │ • metrics       │    │ • /predict/  │
+│ • basket_value  │    │ • evaluate.py     │    │                 │    │   batch      │
+│ • device_type   │    │ • inference.py    │    │                 │    │              │
+│ • purchase      │    │                   │    │                 │    │              │
+└─────────────────┘    └──────────────────┘    └─────────────────┘    └──────────────┘
+         │                       │                       │                       │
+         ▼                       ▼                       ▼                       ▼
+┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐    ┌──────────────┐
+│ Data Processing │    │ Feature          │    │ Model Training  │    │  Production  │
+│ & Cleaning      │    │ Engineering      │    │ & Evaluation    │    │  Deployment  │
+│                 │    │                  │    │                 │    │              │
+│ • Missing value │    │ • Scaling        │    │ • Cross-val     │    │ • Render      │
+│   imputation    │    │ • Encoding       │    │ • Metrics       │    │ • Live API    │
+│ • Type casting  │    │ • New features   │    │ • Selection     │    │ • Monitoring  │
+└─────────────────┘    └──────────────────┘    └─────────────────┘    └──────────────┘
+```
+
+### Data Flow
+1. **Raw Data** → CSV files with customer session data
+2. **Preprocessing** → Clean missing values, handle data types
+3. **Feature Engineering** → Scale, encode, create behavioral features
+4. **Model Training** → Train multiple algorithms, evaluate performance
+5. **Model Selection** → Choose best model based on F1-score
+6. **API Deployment** → Serve predictions via FastAPI on Render
+
+### Key Components
+- **Data Pipeline**: Automated preprocessing and feature engineering
+- **Model Registry**: Versioned models with performance metrics
+- **API Layer**: RESTful endpoints with input validation
+- **Production Deployment**: Scalable hosting with monitoring
 
 ## 🔧 Feature Engineering
 
