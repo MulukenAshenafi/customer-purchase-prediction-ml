@@ -145,13 +145,23 @@ Feature engineering focuses on behavioral intent rather than raw metrics.
 
 Production-ready REST API for real-time predictions.
 
-### Quick Start
+### 🌐 Live Deployment
+
+**🚀 Production API**: https://customer-purchase-prediction-api.onrender.com
+
+**📚 Interactive Docs**: https://customer-purchase-prediction-api.onrender.com/docs
+
+**✅ Status**: Live and ready for production use
+
+**⚡ Performance**: Deployed on Render with automatic scaling
+
+### Local Development
 
 ```bash
 # Install dependencies
 pip install -r requirements.txt
 
-# Start the API server
+# Start the API server locally
 uvicorn api.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
@@ -160,8 +170,8 @@ uvicorn api.main:app --reload --host 0.0.0.0 --port 8000
 ### Endpoints
 
 #### Health Check
-```http
-GET /health
+```bash
+curl https://customer-purchase-prediction-api.onrender.com/health
 ```
 
 Response:
@@ -178,20 +188,17 @@ Response:
 ```
 
 #### Single Prediction
-```http
-POST /predict
-```
-
-Request:
-```json
-{
-  "customer_id": 12345,
-  "time_spent": 25.5,
-  "pages_viewed": 8,
-  "basket_value": 75.0,
-  "device_type": "Mobile",
-  "customer_type": "Returning"
-}
+```bash
+curl -X POST "https://customer-purchase-prediction-api.onrender.com/predict" \
+     -H "Content-Type: application/json" \
+     -d '{
+       "customer_id": 12345,
+       "time_spent": 25.5,
+       "pages_viewed": 8,
+       "basket_value": 75.0,
+       "device_type": "Mobile",
+       "customer_type": "Returning"
+     }'
 ```
 
 Response:
@@ -205,24 +212,21 @@ Response:
 ```
 
 #### Batch Predictions
-```http
-POST /predict/batch
-```
-
-Request:
-```json
-{
-  "customers": [
-    {
-      "customer_id": 12345,
-      "time_spent": 25.5,
-      "pages_viewed": 8,
-      "basket_value": 75.0,
-      "device_type": "Mobile",
-      "customer_type": "Returning"
-    }
-  ]
-}
+```bash
+curl -X POST "https://customer-purchase-prediction-api.onrender.com/predict/batch" \
+     -H "Content-Type: application/json" \
+     -d '{
+       "customers": [
+         {
+           "customer_id": 12345,
+           "time_spent": 25.5,
+           "pages_viewed": 8,
+           "basket_value": 75.0,
+           "device_type": "Mobile",
+           "customer_type": "Returning"
+         }
+       ]
+     }'
 ```
 
 Response:
@@ -295,6 +299,59 @@ predictions = predictor.predict_from_csv(
     'new_customers.csv',
     output_path='predictions.csv'
 )
+```
+
+### Live API Usage with Python
+
+```python
+import requests
+
+# Single prediction
+response = requests.post(
+    "https://customer-purchase-prediction-api.onrender.com/predict",
+    json={
+        "customer_id": 12345,
+        "time_spent": 25.5,
+        "pages_viewed": 8,
+        "basket_value": 75.0,
+        "device_type": "Mobile",
+        "customer_type": "Returning"
+    }
+)
+result = response.json()
+print(f"Purchase prediction: {result['purchase_prediction']}")
+print(f"Confidence: {result['prediction_confidence']}")
+
+# Health check
+health = requests.get("https://customer-purchase-prediction-api.onrender.com/health")
+print(f"API Status: {health.json()['status']}")
+```
+
+### Live API Usage with JavaScript
+
+```javascript
+// Single prediction
+fetch('https://customer-purchase-prediction-api.onrender.com/predict', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    customer_id: 12345,
+    time_spent: 25.5,
+    pages_viewed: 8,
+    basket_value: 75.0,
+    device_type: 'Mobile',
+    customer_type: 'Returning'
+  })
+})
+.then(response => response.json())
+.then(data => console.log(data));
+
+// Health check
+fetch('https://customer-purchase-prediction-api.onrender.com/health')
+.then(response => response.json())
+.then(data => console.log('API Status:', data.status));
 ```
 
 ## 📄 License
